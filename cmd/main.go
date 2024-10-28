@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"go-core-task/config"
-	StringAssemblerUseCase "go-core-task/internal/stringAssembler/UseCase"
-	TypeIdentifierUseCase "go-core-task/internal/typeIdentifier/UseCase"
+	"go-core-task/internal/sliceAssembler/UseCase"
 	"log"
-	"reflect"
 )
 
 func main() {
@@ -14,44 +12,42 @@ func main() {
 	log.Println("Loading config...")
 	v, err := config.LoadConfig()
 	if err != nil {
-		log.Fatal("Cannot load config: ", err.Error())
+		log.Fatalf("error loading config: %v", err)
 	}
+
 	cfg, err := config.ParseConfig(v)
 	if err != nil {
-		log.Println("Starting server")
-		v, err = config.LoadConfig()
-		if err != nil {
-			log.Fatal("Cannot load config: ", err.Error())
-		}
-		log.Fatal("Config parse error: ", err.Error())
+		log.Fatalf("error parsing config: %v", err)
 	}
+
 	log.Println("Config loaded")
 
-	TypeIdentifierUC := TypeIdentifierUseCase.NewTypeIdentifier()
-	StringAssemblerUC := StringAssemblerUseCase.NewStringAssembler(*cfg)
+	sliceManipulate(*cfg)
+}
 
-	values := reflect.ValueOf(cfg.Values)
+func sliceManipulate(cfg config.Config) {
+	sliceAssemblerUC := UseCase.NewSliceAssembler()
 
-	fmt.Println("\nTypes of variables: ")
-	for i := 0; i < values.NumField(); i++ {
-		field := values.Field(i).Interface()
-		fmt.Println(TypeIdentifierUC.IdentifyType(field))
+	originalSlice := sliceAssemblerUC.NewRandomSlice(cfg.Slice.Length, cfg.Slice.MinimalValue, cfg.Slice.MaximumValue)
+	fmt.Println("\nOriginal slice: ")
+	fmt.Println(originalSlice)
+
+	evenSlice := sliceAssemblerUC.SliceExample(originalSlice)
+	fmt.Println("\nEven slice: ")
+	fmt.Println(evenSlice)
+
+	sliceWithAdditionalNum := sliceAssemblerUC.AddElements(cfg.Slice.AdditionalNumber, originalSlice)
+	fmt.Println("\nSlice with additional number ")
+	fmt.Println(sliceWithAdditionalNum)
+
+	copiedSlice := sliceAssemblerUC.CopySlice(originalSlice)
+	fmt.Println("\nCopied slice: ")
+	fmt.Println(copiedSlice)
+
+	removedIndexSlice, err := sliceAssemblerUC.RemoveElement(cfg.Slice.IndexForRemove, originalSlice)
+	if err != nil {
+		log.Println(err.Error())
 	}
-
-	fmt.Println("\nAll data in one string:")
-	var strings []string
-	for i := 0; i < values.NumField(); i++ {
-		str, err := StringAssemblerUC.ToString(values.Field(i))
-		if err != nil {
-			log.Println(err.Error())
-		}
-		strings = append(strings, str)
-	}
-	stringData := StringAssemblerUC.StringStream(strings...)
-	fmt.Println(stringData)
-
-	fmt.Println("\nHexed string: ")
-	stringWithSalt := StringAssemblerUC.AddSalt(stringData, len(stringData)/2)
-	runes := StringAssemblerUC.RuneSlice(stringWithSalt)
-	fmt.Println(StringAssemblerUC.HexRunes(runes))
+	fmt.Println("\nSlice with removed index: ")
+	fmt.Println(removedIndexSlice)
 }
