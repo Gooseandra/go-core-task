@@ -1,0 +1,11 @@
+Values:
+  int_decimal: 10
+  int_octal: 052
+  int_hexadecimal: 0x2A
+  float: 3.14
+  str: "Golang"
+  boolean: true
+  complex: "1 + 2i"
+
+Hex:
+  salt: "go-2024"
