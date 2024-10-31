@@ -3,62 +3,91 @@ package main
 import "fmt"
 
 type StringIntMap struct {
-	data map[string]int
+	key   string
+	value int
 }
 
-func NewStringIntMap() *StringIntMap {
-	return &StringIntMap{
-		data: make(map[string]int),
+type StringIntMapSlice struct {
+	data []StringIntMap
+}
+
+func NewStringIntMapSlice() *StringIntMapSlice {
+	return &StringIntMapSlice{
+		data: make([]StringIntMap, 0),
 	}
 }
 
-func (m *StringIntMap) Add(key string, value int) {
-	m.data[key] = value
+func (m *StringIntMapSlice) Add(key string, value int) {
+	for i, item := range m.data {
+		if item.key == key {
+			m.data[i].value = value
+			return
+		}
+	}
+	m.data = append(m.data, StringIntMap{key, value})
 }
 
-func (m *StringIntMap) Remove(key string) {
-	delete(m.data, key)
+func (m *StringIntMapSlice) Remove(key string) {
+	for i, item := range m.data {
+		if item.key == key {
+			m.data = append(m.data[:i], m.data[i+1:]...)
+			return
+		}
+	}
 }
 
-func (m *StringIntMap) Copy() map[string]int {
+func (m *StringIntMapSlice) Copy() map[string]int {
 	newMap := make(map[string]int)
-	for k, v := range m.data {
-		newMap[k] = v
+	for _, item := range m.data {
+		newMap[item.key] = item.value
 	}
 	return newMap
 }
 
-func (m *StringIntMap) Exists(key string) bool {
-	_, exists := m.data[key]
-	return exists
+func (m *StringIntMapSlice) Exists(key string) bool {
+	for _, item := range m.data {
+		if item.key == key {
+			return true
+		}
+	}
+	return false
 }
 
-func (m *StringIntMap) Get(key string) (int, bool) {
-	value, exists := m.data[key]
-	return value, exists
+func (m *StringIntMapSlice) Get(key string) (int, bool) {
+	for _, item := range m.data {
+		if item.key == key {
+			return item.value, true
+		}
+	}
+	return 0, false
 }
 
 func main() {
-	m := NewStringIntMap()
+	m := NewStringIntMapSlice()
 
-	m.Add("ine", 1)
+	m.Add("one", 1)
 	m.Add("two", 2)
 	m.Add("three", 3)
 
-	if value, exists := m.Get("1"); exists {
+	if value, exists := m.Get("one"); exists {
 		fmt.Printf("Key: one, Value: %d\n", value)
 	} else {
 		fmt.Println("Key: one does not exist")
 	}
 
-	if m.Exists("2") {
+	if m.Exists("two") {
 		fmt.Println("Key: two exists")
 	} else {
 		fmt.Println("Key: two does not exist")
 	}
 
-	m.Remove("2")
-	if !m.Exists("2") {
+	m.Add("two", 22)
+	if value, exists := m.Get("two"); exists {
+		fmt.Printf("Updated Key: two, New Value: %d\n", value)
+	}
+
+	m.Remove("two")
+	if !m.Exists("two") {
 		fmt.Println("Key: two has been removed")
 	}
 
@@ -66,7 +95,7 @@ func main() {
 	fmt.Println("Copied Map:", copiedMap)
 
 	fmt.Println("Original Map:")
-	for key, value := range m.Copy() {
+	for key, value := range copiedMap {
 		fmt.Printf("Key: %s, Value: %d\n", key, value)
 	}
 }
