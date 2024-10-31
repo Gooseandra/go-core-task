@@ -1,6 +1,0 @@
-Slice:
-  MinimalValue: 1
-  MaximumValue: 100
-  Length: 10
-  AdditionalNumber: 666
-  IndexForRemove: 3
