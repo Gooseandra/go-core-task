@@ -2,8 +2,8 @@ package main
 
 import "fmt"
 
-func FindSliceDifference(slice1, slice2 []string) []string {
-	elementCount := make(map[string]int)
+func FindSliceCoincidences(slice1, slice2 []int) ([]int, bool) {
+	elementCount := make(map[int]int)
 
 	for _, v := range slice1 {
 		elementCount[v] = 1
@@ -18,17 +18,20 @@ func FindSliceDifference(slice1, slice2 []string) []string {
 		}
 	}
 
-	var result []string
+	var result []int
 	for key, val := range elementCount {
-		if val == 1 {
+		if val == 2 {
 			result = append(result, key)
 		}
 	}
-	return result
+	if len(result) == 0 {
+		return nil, false
+	}
+	return result, true
 }
 
 func main() {
-	slice1 := []string{"1", "2"}
-	slice2 := []string{"1", "2"}
-	fmt.Println(FindSliceDifference(slice1, slice2))
+	a := []int{65, 3, 58, 678, 64}
+	b := []int{64, 2, 3, 43}
+	fmt.Println(FindSliceCoincidences(a, b))
 }

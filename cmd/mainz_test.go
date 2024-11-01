@@ -5,57 +5,68 @@ import (
 	"testing"
 )
 
-// почему то тесты неправильно работают, "For [] and [], expected [], got []", говорят, что fail, но функция работает правильно
-func TestFindSliceDifference(t *testing.T) {
+func TestFindSliceCoincidences(t *testing.T) {
 	tests := []struct {
-		slice1   []string
-		slice2   []string
-		expected []string
-		testName string
+		slice1     []int
+		slice2     []int
+		expected   []int
+		expectedOk bool
+		testName   string
 	}{
 		{
-			slice1:   []string{"a", "b", "c"},
-			slice2:   []string{"b", "c", "d"},
-			expected: []string{"a", "d"},
-			testName: "Common elements with unique differences",
+			slice1:     []int{1, 2, 3},
+			slice2:     []int{2, 3, 4},
+			expected:   []int{2, 3},
+			expectedOk: true,
+			testName:   "Common elements with unique differences",
 		},
 		{
-			slice1:   []string{"apple", "banana"},
-			slice2:   []string{"banana", "cherry"},
-			expected: []string{"apple", "cherry"},
-			testName: "Two unique differences",
+			slice1:     []int{5, 6, 7},
+			slice2:     []int{6, 7, 8},
+			expected:   []int{6, 7},
+			expectedOk: true,
+			testName:   "Two unique differences",
 		},
 		{
-			slice1:   []string{"a", "b"},
-			slice2:   []string{"a", "b"},
-			expected: []string{},
-			testName: "No differences",
+			slice1:     []int{1, 2, 3},
+			slice2:     []int{1, 2, 3},
+			expected:   []int{1, 2, 3},
+			expectedOk: true,
+			testName:   "No differences, all elements match",
 		},
 		{
-			slice1:   []string{},
-			slice2:   []string{"a", "b"},
-			expected: []string{"a", "b"},
-			testName: "Empty first slice",
+			slice1:     []int{},
+			slice2:     []int{10, 20},
+			expected:   nil,
+			expectedOk: false,
+			testName:   "First slice empty",
 		},
 		{
-			slice1:   []string{"a", "b"},
-			slice2:   []string{},
-			expected: []string{"a", "b"},
-			testName: "Empty second slice",
+			slice1:     []int{30, 40},
+			slice2:     []int{},
+			expected:   nil,
+			expectedOk: false,
+			testName:   "Second slice empty",
 		},
 		{
-			slice1:   []string{},
-			slice2:   []string{},
-			expected: []string{},
-			testName: "Both slices empty",
+			slice1:     []int{},
+			slice2:     []int{},
+			expected:   nil,
+			expectedOk: false,
+			testName:   "Both slices empty",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			result := FindSliceDifference(tt.slice1, tt.slice2)
+			result, ok := FindSliceCoincidences(tt.slice1, tt.slice2)
+
 			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("For %v and %v, expected %v, got %v", tt.slice1, tt.slice2, tt.expected, result)
+				t.Errorf("For slices %v and %v, expected result %v, got %v", tt.slice1, tt.slice2, tt.expected, result)
+			}
+
+			if ok != tt.expectedOk {
+				t.Errorf("For slices %v and %v, expected ok %v, got %v", tt.slice1, tt.slice2, tt.expectedOk, ok)
 			}
 		})
 	}
